@@ -1,0 +1,17 @@
+name: Frontend Test
+run-name: Frontend Test
+on: [push]
+jobs:
+  Frontend-Test:
+    runs-on: ubuntu-latest
+    steps:              
+    
+      - uses: actions/checkout@v3
+      
+      - name: React Build Test
+        run: |
+          npm install react-scripts
+          npm run build
+        working-directory: ./frontend
+
+
