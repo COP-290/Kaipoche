@@ -45,7 +45,7 @@ class TestParticular_question(unittest.TestCase):
         self.assertEqual((a4),x)
     
     def test_put_answer(self):
-        x = put_answer(0,95)
+        x = one_ans(0,95)
         # print(x)
         # print(List)
         self.assertEqual((a5),x)
