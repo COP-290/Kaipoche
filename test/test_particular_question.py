@@ -15,6 +15,7 @@ from flask_blog.particular_question import particular_que_from_id,answer_from_pa
 
 class TestParticular_question(unittest.TestCase):
     def test_particular_que_from_id(self):
+        x = particular_que_from_id(90)
         self.assertEqual((question_from_tag_answer),x)
     
     def test_answer_from_parent_id(self):
@@ -34,5 +35,5 @@ class TestParticular_question(unittest.TestCase):
         self.assertEqual((sortans),x)
     
     def test_put_answer(self):
-        x = put_answer(90,"")
+        x = put_answer(90,66,"")
         self.assertEqual((putans),x)
