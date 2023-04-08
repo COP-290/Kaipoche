@@ -148,15 +148,7 @@ def put_answer(id,ownerid,body):
     return ""
 
 
-# print(answer_from_parent_id(80))
-@app.route('/')
-def particular_question():
-    l=particular_que_from_id(80)
-    n=1
-    ans_list=answer_from_parent_id(80)
-    # print(ans_list)
-    m=len(ans_list)
-    return render_template('particular_question.html',l=l,n=n,ans_list=ans_list,m=m)
+
 
 def one_ans(Up,id):
         conn = requestConnection()
