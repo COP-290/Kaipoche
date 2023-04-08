@@ -16,7 +16,7 @@ a2=[(92, 61, datetime.datetime(2008, 8, 1, 14, 45, 37), 90, 13, 'Its Answer is t
 a3=98
 a4=""
 a5=13
-from flask_blog.particular_question import particular_que_from_id,answer_from_parent_id,score_question,score_answer,sort_ans_by_time,put_answer
+from flask_blog.particular_question import particular_que_from_id,answer_from_parent_id,score_question,score_answer,sort_ans_by_time,put_answer, one_ans
 
 class TestParticular_question(unittest.TestCase):
     def test_particular_que_from_id(self):
