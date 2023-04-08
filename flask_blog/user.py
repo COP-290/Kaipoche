@@ -4,8 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_paginate import Pagination, get_page_args
 import MySQLdb
 from flask_blog.tag import get_tags
-from question import pagefunction
-from question import showQuestion_byscore_help,sort_que_by_time
+from flask_blog.question import pagefunction
+from flask_blog.question import showQuestion_byscore_help,sort_que_by_time
 # from particular_question import particular_que_from_id,answer_from_parent_id,score_question,score_answer,sort_ans_by_time
 # from user import check_login
 import re
