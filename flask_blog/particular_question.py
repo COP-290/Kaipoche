@@ -82,10 +82,11 @@ def score_question(Up,id):
         cursor.close()
         conn.close()
         l=particular_que_from_id(id)
-        n=1
-        ans_list=answer_from_parent_id(id)
-        m=len(ans_list)
-        return l,n,ans_list,m 
+        # n=1
+        # ans_list=answer_from_parent_id(id)
+        # m=len(ans_list)
+        # return l,n,ans_list,m 
+        return l[0][3]
 
 def score_answer(Up,id):
         conn = requestConnection()
@@ -130,20 +131,21 @@ def sort_ans_by_time(id,time):
     conn.close()
     return l,n,Answer_list,m 
 
-def put_answer(id,body):
-# def put_answer(id,ownerid,body):
+# def put_answer(id,body): #has to correct this function
+def put_answer(id,ownerid,body):
     conn = requestConnection()
     cursor = requestCursor(conn)
-    l=particular_que_from_id(id)
-    n=1 
-    # cursor.execute('insert into Answer (Owner_User_Id,Parent_ID,Score,Body) Values ("%s","%s","%s","%s")',(ownerid,id,0,body))
-    cursor.execute('insert into Answer (Parent_ID,Score,Body) Values ("%s","%s","%s")',(id,0,body))
+    # l=particular_que_from_id(id)
+    # n=1 
+    cursor.execute('insert into Answer (Owner_User_Id,Parent_ID,Score,Body) Values ("%s","%s","%s","%s")',(ownerid,id,0,body))
+    # cursor.execute('insert into Answer (Parent_ID,Score,Body) Values ("%s","%s","%s")',(id,0,body))
     conn.commit()
     cursor.close()
     conn.close()
-    ans_list=answer_from_parent_id(id)
-    m=len(ans_list)
-    return l,n,ans_list,m 
+    # ans_list=answer_from_parent_id(id)
+    # m=len(ans_list)
+    # return l,n,ans_list,m 
+    return ""
 
 
 # print(answer_from_parent_id(80))
@@ -156,5 +158,21 @@ def particular_question():
     m=len(ans_list)
     return render_template('particular_question.html',l=l,n=n,ans_list=ans_list,m=m)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0',debug=True,port=7015)
+def one_ans(Up,id):
+        conn = requestConnection()
+        cursor = requestCursor(conn)
+        cursor.execute('select Score from Answer where id='+str(id))
+        score=cursor.fetchone()
+        cursor.execute('Update Answer set Score= '+str(score[0]+Up)+' where Id='+str(id))
+        Ownerid=cursor.execute('select Owner_User_Id,Score from Answer where Id= '+str(id))
+        Ownerid=cursor.fetchone()
+        ownscore=Ownerid[1]
+        Ownerid=Ownerid[0]
+        if Up==1:
+          cursor.execute('Update User set up_votes='+str(ownscore+Up)+' where id='+str(Ownerid))
+        else:
+            cursor.execute('Update User set down_votes='+str(ownscore+Up)+' where id='+str(Ownerid))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return score[0]+Up

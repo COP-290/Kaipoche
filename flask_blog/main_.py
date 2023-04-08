@@ -2,12 +2,13 @@ from flask import Flask, render_template, request, url_for, flash, redirect, ses
 from werkzeug.exceptions import abort
 from flask_paginate import Pagination, get_page_args
 import MySQLdb
-from tag import get_tags
-from question import pagefunction,pagefunction2,pagefunction_number
-from question import showQuestion_byscore_help,sort_que_by_time
+from user import dis_user,editDisplayname,editAboutme
+from tag import get_tags,get_tags_list
+from question import pagefunction,pagefunction2,pagefunction_number,pagefunction_number_all
+from question import showQuestion_byscore_help,sort_que_by_time,sort_que_by_time_number,sort_quesbyTag
 from particular_question import particular_que_from_id,answer_from_parent_id
 from particular_question import particular_que_from_id,answer_from_parent_id,score_question,score_answer,sort_ans_by_time,put_answer
-from tag_extra import one_ans
+from particular_question import one_ans
 
 # from user import check_login
 import re
@@ -38,145 +39,179 @@ def tag_page_number():
     pagination_users,total=get_tags()
     return str(total)
 
+@app.route('/tag/list',methods=['GET'])
+def tag_list():
+    l=[ {'value':x[0],'label':x[0]} for x in get_tags_list()]
+    # print(l)
+    return dict(enumerate(l))
 
-@app.route('/<string:tag>/<int:page>/question',methods=['GET'])
-def display_question(tag,page): # took care when question is less than 3
+
+@app.route('/<string:tag>/<int:page>/time/question',methods=['GET'])
+def display_question_score(tag,page): # took care when question is less than 3
     ans=pagefunction2(page,tag=tag)
-    print(ans)
+    # print(ans)
     return dict(enumerate(ans))
+
+
+@app.route('/<string:tag>/<int:page>/score/question',methods=['GET'])
+def display_question(tag,page): # took care when question is less than 3
+    ans=sort_quesbyTag(tag,page)
+    # print(ans)
+    return dict(enumerate(ans))
+
 
 @app.route('/<string:tag>/question/number',methods=['GET'])
 def display_question_number(tag): # took care when question is less than 3
     ans=pagefunction_number(tag=tag)
     return str(ans)
 
+# @app.route('/question/number',methods=['GET'])
+# def display_question_number_all(): # took care when question is less than 3
+#     ans=pagefunction_number_all()
+#     return str(ans)
+
 @app.route('/question')
 def zaurez():
     ans=pagefunction("flex")
-    print(ans[0])
-    return dict(enumerate( ans[0]))
-
+    # print(ans[0])
+    return dict(enumerate( ans))
    
+
+
 
 @app.route('/')
 def index():
     tag='flex'
     return render_template('index.html',tag=tag)
 
-@app.route('/answer',methods=['POST'])
-def after_posting_question():
-    return render_template('particular_question.html')
+# @app.route('/answer',methods=['POST'])
+# def after_posting_question():
+#     return render_template('particular_question.html')
 
-@app.route('/score/question',methods=['GET'])
-def showQuestion_byscore():
-    ans=showQuestion_byscore_help()
-    return dict(enumerate(ans[0]))
+@app.route('/score/question/<int:page>',methods=['GET'])
+def showQuestion_byscore(page):
+    ans=showQuestion_byscore_help(page)
+    return dict(enumerate(ans))
 
-@app.route('/time/question',methods=['GET'])
-def sort_que_by_time_main():
-    ans=sort_que_by_time()
-    return dict(enumerate(ans[0]))
+@app.route('/time/question/<int:page>',methods=['GET'])
+def sort_que_by_time_main(page):
+    ans=sort_que_by_time(page)
+    return dict(enumerate(ans))
 
+@app.route('/question/number',methods=['GET']) # what does this api doing
+def sort_que_number():
+    ans=sort_que_by_time_number()
+    print('number...........................',ans)
+    return str(ans)
 
 @app.route('/<int:id>/answer',methods=['GET'])
 def particular_question(id):
     l=particular_que_from_id(id)
     n=1
-    ans_list=answer_from_parent_id(id)
-    m=len(ans_list)
-
     return dict(enumerate(l))
 
 @app.route('/<int:id>/answers',methods=['GET'])
 def particular_question_answer(id):
-    l=particular_que_from_id(id)
-    n=1
     ans_list=answer_from_parent_id(id)
     m=len(ans_list)
     return dict(enumerate( ans_list))
 
-@app.route('/ask/question', methods=['GET','POST'])
+@app.route('/ask/question', methods=['GET','POST']) #error in this function as id not generated in good ways
 def create():
     if 'loggedin' in session:
-        print(session['id'])
+        # print(session['id'])
+
         if request.method == 'POST':
             # if check_login: # how he checked here login by zaurez
-            title = request.form['title']
-            content = request.form['content']
-            tag = request.form['tag']
-            # conn = get_db_connection()
-            # cursor.execute('INSERT INTO posts (title, content) VALUES ("%s", "%s")',(title, content))
-            # cursor.commit()
-            return redirect(url_for('index'))
-            # else:
-            #     pass
-    else:
-        return redirect(url_for('login'))
-    return render_template('new_question.html')
+            title  = request.get_json()['Title']
+            content = request.get_json()['Body']
+            tag = request.get_json()['Tag'] # take care of how to get particular tag from list of tags
+            tag_list = [x["value"] for x in tag]
+            print("@@@@@@@@@@@@@@@@@@@@@",tag_list)
+            # tag = "" # take care of how to get particular tag from list of tags
+            # tag_list=tag.split()
+            conn = requestConnection()
+            cursor = requestCursor(conn)
+            # print(title,content,session['id'])
+            # cursor.execute('INSERT INTO Question (Title, Body,Owner_User_Id,Score) VALUES ("%s","%s", "%s","%s")',(title, content,session['id'],0))
+            cursor.execute('INSERT INTO Question (Title, Body,Score) VALUES ("%s","%s","%s")',(title, content,0))
+            conn.commit()
+            total =max_questionid()[0]
+            print(total)
+            for k in tag_list:
+               cursor.execute('INSERT INTO Tag (ID,tags) VALUES ("%s", "%s")',(total,k))
+               conn.commit()
+            cursor.close()
+            conn.close()
+            print("total..............",total)
+            return str(total)
+            # return redirect(url_for('after_posting_question',id=total))
+    # else:
+    #     return redirect(url_for('login'))
+    # return render_template('new_question.html')
 
-@app.route('/pythonlogin/', methods=['GET', 'POST'])
+def max_questionid():
+    conn=requestConnection()
+    cursor=requestCursor(conn)
+    cursor.execute('SELECT @last_id := MAX(id) FROM Question')
+    Current_questionid=cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return Current_questionid
+
+@app.route('/login/', methods=['GET', 'POST'])
 def login():
-    # Output message if something goes wrong...
     msg = ''
     conn = requestConnection()
     cursor = requestCursor(conn)
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
-        # Create variables for easy access
-        username = request.form['username']
-        password = request.form['password']
-        username = '"' + username + '"'
+    if request.method == 'POST':
+        username = request.get_json()['Username']
+        password = request.get_json()['Password']
+        # password=check_password_hash(user.password, password) #working but need to increase password size
+        # username = '"' + username + '"'
         cursor.execute('SELECT * FROM User WHERE Display_Name = %s AND password = %s', (username, password,))
         account = cursor.fetchall()
         account = list(account)
-        # print(account)
         if account:
-            # Create session data, we can access this data in other routes
             session['loggedin'] = True
-            # print(account['Display_Name'])
             session['username'] = account[0][1]
             session['id'] = account[0][0]
-            # Redirect to home page
-            # return redirect(url_for('home'))
-            return redirect(url_for("show_user"))
+            print("logged")
+            return "You "
         else:
-            # Account doesnt exist or username/password incorrect
             msg = 'Incorrect username/password!'
         cursor.close()
         conn.close()
-    return render_template('login.html', msg=msg)
+    return msg
 
-@app.route('/pythonlogin/logout')
+@app.route('/checkuser',methods=['GET'])
+def checkuser():
+    print("I am here")
+    if "loggedin" in session:
+        return "true"
+    else:
+        return "false"
+
+@app.route('/logout')
 def logout():
-    # Remove session data, this will log the user out
    session.pop('loggedin', None)
    session.pop('id', None)
    session.pop('username', None)
-   # Redirect to login page
-   return redirect(url_for('login'))
+   return "true"
 
-# http://localhost:5000/pythinlogin/register - this will be the registration page, we need to use both GET and POST requests
-@app.route('/pythonlogin/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    # Output message if something goes wrong...
     msg = ''
     conn = requestConnection()
     cursor = requestCursor(conn)
-    # Check if "username", "password" and "email" POST requests exist (user submitted form)
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
-        # Create variables for easy access
-        username = request.form['username']
-        password = request.form['password']
-        email = request.form['email']
-            # Check if account exists using MySQL
-        # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        username = '"' + username + '"'
-        cursor.execute('SELECT * FROM User WHERE Display_Name = ' +  (username))
-        # print("hello world")
+    if request.method=='POST':
+        username = request.get_json()['Username']
+        email = request.get_json()['Email']
+        password = request.get_json()['Password']
+        username1 = '"' + username + '"'
+        cursor.execute('SELECT * FROM User WHERE Display_Name = ' +  (username1))
         account = cursor.fetchone()
 # Remember to remove duplicacy from account
-#
-#
-    # If account exists show error and validation checks 
         if account:
             msg = 'Account already exists!'
         elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
@@ -190,81 +225,100 @@ def register():
             cursor.execute('INSERT INTO User (Display_Name, password) VALUES (%s, %s)', (username, password))
             conn.commit()
             msg = 'You have successfully registered!'
-            return redirect(url_for('show_user'))
-    elif request.method == 'POST':
-        # Form is empty... (no POST data)
-        msg = 'Please fill out the form!'
-    # Show registration form with message (if any)
+            # return redirect(url_for('show_user'))
+            return msg
     cursor.close()
     conn.close()
-    return render_template('register.html', msg=msg)
+    return msg
+    # return render_template('signup.html', msg=msg)
 
-# http://localhost:5000/pythinlogin/home - this will be the home page, only accessible for loggedin users
-@app.route('/pythonlogin/home')
-def home():
-    # Check if user is loggedin
-    if 'loggedin' in session:
-        # User is loggedin show them the home page
-        return render_template('home.html', username=session['username'])
-    # User is not loggedin redirect to login page
-    return redirect(url_for('login'))
+
 
 @app.route('/user')
 def show_user():
     if 'loggedin' in session:
-        # print('hello')
-        return render_template('profile.html',id=session['id'])
+      print("test..............")
+      date,detail=dis_user(session['id'])
+      print(detail[9],"hkj")
+      return {"date":date,"detail":detail}
     else:
         # print('hi')
         msg = "Please login before"
-        return redirect(url_for('login'))
+        return "false"
 
 
 
 @app.route('/<int:id>/upscore',methods=['PUT','GET'])
 def up_score(id):
-    # if 'loggedin' in session:
-        l,n,ans_list,m=score_question(1,id)
-        print(l[0][3])
-        with open ('w.txt', 'w') as file:  
-            file.write(str(l[0][3])) 
-        return str(l[0][3])
+    print("..............",id)
+    if 'loggedin' in session:
+        l=score_question(1,id)
+        return str(l)
     # else:
     #     return redirect(url_for('login'))
 
 @app.route('/<int:id>/downscore',methods=['PUT','GET'])
 def down_score(id):
-    # if 'loggedin' in session:
-        l,n,ans_list,m=score_question(-1,id) 
-        return str(l[0][3])
+    if 'loggedin' in session:
+        l=score_question(-1,id) 
+        return str(l)
     # else:
     #     return redirect(url_for('login'))    
 
 @app.route('/<int:id>/upans',methods=['PUT','GET'])
 def up_ans(id):
-
+    if 'loggedin' in session:
     # l,n,ans_list,m=score_answer(1,id)
-    return str(one_ans(1,id))
+      return str(one_ans(1,id))
 
 @app.route('/<int:id>/downans',methods=['PUT','GET'])
 def down_ans(id):
-
-        # l,n,ans_list,m=score_answer(-1,id)
-        return str(one_ans(-1,id))   
+    if 'loggedin' in session:
+    # l,n,ans_list,m=score_answer(1,id)
+      return str(one_ans(-1,id))
 
 @app.route('/<int:id>/new_ans',methods=['POST','GET'])
 def newanswer(id):
-    # if 'loggedin' in session:
+    if 'loggedin' in session:
         if request.method == 'POST':
-            content = request.form['Answer']
-            l,n,ans_list,m=put_answer(id,content)
-            # l,n,ans_list,m=put_answer(id,session['id'],content)
+            content = request.get_json()['Answer']
+            # print("test...", content)
+            # content = request.form['Answer']
+            put_answer(id,content)
+            #put_answer(id,session['id'],content)
             # return redirect(url_for('particular_question',id=id))
         return "True"
     # else:
     #     return redirect(url_for('login'))
 
+@app.route('/user/displayname')
+def Update_name(name):
+    if 'loggedin' in session:
+        id=session['id']
+        editDisplayname(id,name)
+        return "True"
+    else:
+        return "first logged in"
+
+@app.route('/user/aboutme')
+def Update_About(body):
+    if 'loggedin' in session:
+        id=session['id']
+        editAboutme(id,name)
+        return "True"
+    else:
+        return "first logged in"
+
+@app.route('/<int:id>/score/ans',methods=['GET'])
+def showAns_byscore(id):
+    l,n,ans_list,m=sort_ans_by_time(id,0)
+    return render_template('particular_question.html',l=l,n=n,ans_list=ans_list,m=m)
+
+@app.route('/<int:id>/time/ans',methods=['GET'])
+def sort_ans_by_time_main(id):
+    l,n,ans_list,m=sort_ans_by_time(id,1)
+    return render_template('particular_question.html',l=l,n=n,ans_list=ans_list,m=m)
+
 
 if __name__=="__main__":
-    # socketio.run(app,host='0.0.0.0',debug=True,port=5003)
-    app.run(host='0.0.0.0',debug=True,port=5004)
+    app.run(host='0.0.0.0',debug=True,port=5003)

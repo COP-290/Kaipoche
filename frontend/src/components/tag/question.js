@@ -8,7 +8,7 @@ export default function Question() {
 
   const [data,setdata] = useState(null);
   const [page, setPage] = useState(1)
-  const [sortby,setSortby] = useState('');
+  const [sortby,setSortby] = useState('/time');
   const [number, setNumber] = useState(0)
   const { id } = useParams(); 
   console.log(id);
@@ -31,7 +31,7 @@ export default function Question() {
 
   useEffect(() => {
     console.log(sortby)
-    fetch(id?`/${id}/${page}${sortby}/question`:`${sortby}/question`).then((res) =>
+    fetch(id?`/${id}/${page}${sortby}/question`:`${sortby}/question/${page}`).then((res) =>
         res.json().then((data) => {
             console.log(data);
             setdata(data)
@@ -43,7 +43,7 @@ export default function Question() {
 
 
 useEffect(() => {
-    fetch(`/${id}/question/number`).then((res) =>
+    fetch(id?`/${id}/question/number`:`/question/number`).then((res) =>
         res.json().then((data) => {
             console.log(data);
             setNumber(parseInt(data))
@@ -63,8 +63,8 @@ useEffect(() => {
 
 
 <div class ="col-12 px-4 d-flex justify-content-end">
-  <button type="button" class="btn btn-success">
-    <a class="ask_btn "href="/new_question">Ask question</a>
+  <button type="button" class="btn btn-success ask_btn">
+    <a class=" ask_btn"href="/new_question">Ask question</a>
   </button>
 </div>
 
@@ -74,7 +74,7 @@ useEffect(() => {
       Sorting
     </button>
     <ul class="dropdown-menu">
-      <li><a class="dropdown-item" onClick={()=>setSortby('')}>Newest</a></li>
+      <li><a class="dropdown-item" onClick={()=>setSortby('/time')}>Newest</a></li>
       <li><a class="dropdown-item" href="#">Active</a></li>
       <li><a class="dropdown-item" onClick={()=>setSortby('/score')}>Score</a></li>
     </ul>
@@ -153,7 +153,7 @@ useEffect(() => {
 
         <div class="col-12 user_ppp d-flex justify-content-end pt-2">
           <div class="d-flex justify-content-center">
-            <div style={{"color":"white"}}>
+            <div style={{"color":"#1d1d1f"}}>
               {value[0][2]}
             </div>
           </div>
@@ -171,7 +171,7 @@ useEffect(() => {
     <div class="pagination d-flex justify-content-center" >
         <PaginationControl
             page={page}
-            between={4}
+            between={3}
             total={number?number:0}
             limit={6}
             changePage={(page) => {

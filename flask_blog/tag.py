@@ -65,7 +65,6 @@ def requestCursor(conn):
 
 
 def get_tags(offset=0,per_page=6):
-
     conn = requestConnection()
     cursor = requestCursor(conn)
     l = cursor.execute('select count(tags),tags from Tag group by tags order by count(*) desc limit 6 offset '+str(offset))

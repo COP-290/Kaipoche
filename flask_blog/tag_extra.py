@@ -129,3 +129,39 @@ def one_ans(Up,id):
         cursor.close()
         conn.close()
         return score[0]+Up
+
+def editDisplayname(id,name):
+    conn = requestConnection()
+    cursor = requestCursor(conn)
+    p=cursor.execute('Update User set Display_Name='+str(name)+' where Id= '+str('id'))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return "Done"
+
+def editAboutme(id,s):
+    conn = requestConnection()
+    cursor = requestCursor(conn)
+    p=cursor.execute('Update User set About_me='+str(name)+' where Id= '+str('id'))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return "Done"
+
+@app.route('/user/displayname')
+def Update_name(name):
+    if 'loggedin' in session:
+        id=session['id']
+        editDisplayname(id,name)
+        return "True"
+    else:
+        return "first logged in"
+
+@app.route('/user/aboutme')
+def Update_About(body):
+    if 'loggedin' in session:
+        id=session['id']
+        editAboutme(id,name)
+        return "True"
+    else:
+        return "first logged in"

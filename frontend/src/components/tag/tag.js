@@ -71,7 +71,7 @@ export default function Tag() {
 
                 </div>
                 <div class="tag_body" style={{" color": "rgb(88, 88, 88)"}} > 
-                    Python is a multi-paradigm, dynamically typed, multi-purpose programming language.
+                    {value[1]} is a multi-paradigm, dynamically typed, multi-purpose programming language.
                 </div>
                 <div class="tag_questions d-flex justify-content-end ">
                     {value[0]} questions

@@ -16,6 +16,8 @@ import About from './components/tag/about';
 // import WebSocketCall from './components/tag/socket';
 // import { io } from "socket.io-client";
 import { useEffect, useState } from "react";
+import Fzf from './components/tag/404';
+import Main from './components/tag/main';
 
 
 function App() {
@@ -60,24 +62,26 @@ function App() {
 
   return (
     <>
-        <Navbar/>
+        
 
         <Router>
           <Routes>
-            <Route path="/tag1" element={<Tag1/>} />        
+            <Route path="/tag1" element={<><Navbar/><Tag1/></>} />        
             {/* <Route path="/socket" element={<WebSocketCall/>} />         */}
-            <Route path="/about" element={<About/>} />        
-            <Route path="/tag" element={<Tag/>} />        
-            <Route path="/tag/:id" element={<Question/> } />        
-            <Route path="/test" element={<Test/>} />        
-            <Route path="/particular_question" element={<Par_ques/>} />        
-            <Route path="/particular_test" element={<Par_test/>} />        
-            <Route path="/new_question" element={<New_ques/>} />        
-            <Route path="/question/:id" element={<Par_ques/>} />        
-            <Route path="/question" element={<Question/>} />        
-            <Route path="/profile" element={<Profile/>} />        
-            <Route path="/login" element={<Login/>} />        
-            <Route path="/signup" element={<Signup/>} />        
+            <Route path="/main" element={<><Navbar/><Main/></>} />
+            <Route path="/about" element={<><Navbar/><About/></>} />        
+            <Route path="/tag" element={<><Navbar/><Tag/></>} />        
+            <Route path="/tag/:id" element={<><Navbar/><Question/> </>} />        
+            <Route path="/test" element={<><Navbar/><Test/></>} />        
+            <Route path="/particular_question" element={<><Navbar/><Par_ques/></>} />        
+            <Route path="/particular_test" element={<><Navbar/><Par_test/></>} />        
+            <Route path="/new_question" element={<><Navbar/><New_ques/></>} />        
+            <Route path="/question/:id" element={<><Navbar/><Par_ques/></>} />        
+            <Route path="/question" element={<><Navbar/><Question/></>} />        
+            <Route path="/profile" element={<><Navbar/><Profile/></>} />        
+            <Route path="/login" element={<><Navbar/><Login/></>} />        
+            <Route path="/signup" element={<><Navbar/><Signup/></>} /> 
+            <Route path="/404" element={<Fzf/>} />       
           </Routes>
         </Router>
 

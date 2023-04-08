@@ -7,7 +7,7 @@ import MySQLdb
 from tag import get_tags
 from user import dis_user
 from question import pagefunction
-from question import showQuestion_byscore_help,sort_que_by_time
+from question import showQuestion_byscore_help,sort_que_by_time,sort_que_by_time_number
 from particular_question import particular_que_from_id,answer_from_parent_id,score_question,score_answer,sort_ans_by_time,put_answer
 # from user import check_login
 import re
@@ -51,6 +51,9 @@ def display_question(tag): # took care when question is less than 3
     ans=pagefunction(tag)
     print(ans[0])
     return render_template('question.html',l=ans[0],n=ans[1],page=ans[2],per_page=ans[3],pagination=ans[4])
+
+
+
 
 @app.route('/question')
 def zaurez():
@@ -135,6 +138,7 @@ def login():
         cursor.execute('SELECT * FROM User WHERE Display_Name = %s AND password = %s', (username, password,))
         account = cursor.fetchall()
         account = list(account)
+        # print(account[0])
         if account:
             session['loggedin'] = True
             session['username'] = account[0][1]
@@ -176,7 +180,6 @@ def register():
             msg = 'Please fill out the form!'
         else:
         # Account doesnt exists and the form data is valid, now insert new account into accounts table
-            password=generate_password_hash(password, method='sha256')
             cursor.execute('INSERT INTO User (Display_Name, password) VALUES (%s, %s)', (username, password))
             conn.commit()
             msg = 'You have successfully registered!'
@@ -267,4 +270,4 @@ def about():
     return render_template('About.html')
 
 if __name__=="__main__":
-    app.run(host='0.0.0.0',debug=True,port=5011)
+    app.run(host='0.0.0.0',debug=True,port=5010)
